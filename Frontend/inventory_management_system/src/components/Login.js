@@ -34,7 +34,7 @@ export default function Login() {
 
             try {
                 // --- FIXED LINE BELOW: Used full URL + /login endpoint ---
-                const res = await fetch("https://smartstock-backend.onrender.com/login", {
+                const res = await fetch("https://smartstock-backend-x2vv.onrender.com", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
