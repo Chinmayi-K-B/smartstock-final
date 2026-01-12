@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { BASE_URL } from '../helper';
 
 export default function InsertProduct() {
     

@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 // 1. Import the PDF libraries
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import { BASE_URL } from '../helper';
 
 export default function Products() {
 
