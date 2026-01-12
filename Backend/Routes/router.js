@@ -1,165 +1,79 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const products = require('../Models/Products');
-const users = require('../Models/userSchema'); // Import User Model
-const bcrypt = require("bcryptjs"); // Import bcrypt for password checking
+// IMPORT THE SCHEMA WE JUST CREATED
+const products = require("../Models/Products"); 
 
-// ==============================================
-// 1. USER AUTHENTICATION ROUTES
-// ==============================================
+// 1. INSERT DATA (Matches your Frontend fetch)
+router.post("/insertproduct", async (req, res) => {
+    // console.log(req.body); // Uncomment to debug
+    const { ProductName, ProductPrice, ProductBarcode, ProductQty } = req.body;
 
-// REGISTER USER
-router.post("/register", async (req, res) => {
-    const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
+    if (!ProductName || !ProductPrice || !ProductBarcode || !ProductQty) {
         return res.status(422).json({ error: "Please fill all fields" });
     }
 
     try {
-        const preuser = await users.findOne({ email: email });
-
-        if (preuser) {
-            return res.status(422).json({ error: "Email already exists" });
+        // Check if barcode already exists
+        const preproduct = await products.findOne({ ProductBarcode: ProductBarcode });
+        
+        if (preproduct) {
+            return res.status(422).json({ error: "Product with this barcode already exists!" });
         } else {
-            const finalUser = new users({ name, email, password });
-            await finalUser.save();
-            res.status(201).json(finalUser);
-            console.log("User Registered");
+            const addProduct = new products({
+                ProductName, ProductPrice, ProductBarcode, ProductQty
+            });
+            await addProduct.save();
+            res.status(201).json(addProduct);
+            console.log("Data Saved Successfully");
         }
     } catch (error) {
         res.status(422).json(error);
-        console.log(error);
     }
 });
 
-// LOGIN USER
-router.post("/login", async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ error: "Please fill all details" });
-    }
-
+// 2. GET ALL DATA (For Products Page)
+router.get("/products", async (req, res) => {
     try {
-        const userValid = await users.findOne({ email: email });
-
-        if (userValid) {
-            const isMatch = await bcrypt.compare(password, userValid.password);
-
-            if (!isMatch) {
-                res.status(422).json({ error: "Invalid Details" });
-            } else {
-                // Generate Token
-                const token = await userValid.generateAuthToken();
-
-                // Send Token as Cookie
-                res.cookie("usercookie", token, {
-                    expires: new Date(Date.now() + 9000000),
-                    httpOnly: true
-                });
-
-                const result = {
-                    userValid,
-                    token
-                }
-                res.status(201).json({ status: 201, result });
-            }
-        } else {
-            res.status(422).json({ error: "Invalid Details" });
-        }
+        const productdata = await products.find();
+        res.status(201).json(productdata);
     } catch (error) {
-        res.status(401).json(error);
-        console.log(error);
+        res.status(422).json(error);
     }
 });
 
-
-// ==============================================
-// 2. PRODUCT MANAGEMENT ROUTES (EXISTING)
-// ==============================================
-
-// Inserting (Creating) Data:
-router.post("/insertproduct", async (req, res) => {
-    const { ProductName, ProductPrice, ProductBarcode, ProductQty } = req.body;
-
+// 3. GET SINGLE PRODUCT (For Update Page)
+router.get("/products/:id", async (req, res) => {
     try {
-        const pre = await products.findOne({ ProductBarcode: ProductBarcode })
-        console.log(pre);
-
-        if (pre) {
-            res.status(422).json("Product is already added.")
-        }
-        else {
-            const addProduct = new products({ 
-                ProductName, 
-                ProductPrice, 
-                ProductBarcode, 
-                ProductQty 
-            });
-
-            await addProduct.save();
-            res.status(201).json(addProduct)
-            console.log(addProduct)
-        }
+        const { id } = req.params;
+        const productindividual = await products.findById({ _id: id });
+        res.status(201).json(productindividual);
+    } catch (error) {
+        res.status(422).json(error);
     }
-    catch (err) {
-        console.log(err)
-    }
-})
+});
 
-// Getting (Reading) All Data:
-router.get('/products', async (req, res) => {
+// 4. UPDATE PRODUCT
+router.patch("/updateproduct/:id", async (req, res) => {
     try {
-        const getProducts = await products.find({})
-        console.log(getProducts);
-        res.status(201).json(getProducts);
+        const { id } = req.params;
+        const updatedproduct = await products.findByIdAndUpdate(id, req.body, {
+            new: true
+        });
+        res.status(201).json(updatedproduct);
+    } catch (error) {
+        res.status(422).json(error);
     }
-    catch (err) {
-        console.log(err);
-    }
-})
+});
 
-// Getting (Reading) Individual Data:
-router.get('/products/:id', async (req, res) => {
+// 5. DELETE PRODUCT
+router.delete("/deleteproduct/:id", async (req, res) => {
     try {
-        const getProduct = await products.findById(req.params.id);
-        console.log(getProduct);
-        res.status(201).json(getProduct);
+        const { id } = req.params;
+        const deletproduct = await products.findByIdAndDelete({ _id: id });
+        res.status(201).json(deletproduct);
+    } catch (error) {
+        res.status(422).json(error);
     }
-    catch (err) {
-        console.log(err);
-    }
-})
-
-// Editing (Updating) Data:
-router.put('/updateproduct/:id', async (req, res) => {
-    const { ProductName, ProductPrice, ProductBarcode, ProductQty } = req.body;
-
-    try {
-        const updateProducts = await products.findByIdAndUpdate(
-            req.params.id, 
-            { ProductName, ProductPrice, ProductBarcode, ProductQty }, 
-            { new: true }
-        );
-        console.log("Data Updated");
-        res.status(201).json(updateProducts);
-    }
-    catch (err) {
-        console.log(err);
-    }
-})
-
-// Deleting Data:
-router.delete('/deleteproduct/:id', async (req, res) => {
-    try {
-        const deleteProduct = await products.findByIdAndDelete(req.params.id);
-        console.log("Data Deleted");
-        res.status(201).json(deleteProduct);
-    }
-    catch (err) {
-        console.log(err);
-    }
-})
+});
 
 module.exports = router;

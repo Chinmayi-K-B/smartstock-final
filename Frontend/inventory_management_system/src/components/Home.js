@@ -79,7 +79,7 @@ export default function Home() {
       </div>
 
       {/* 3. MAIN BUTTON (With Fade In) */}
-      <NavLink to="/login" className="neo-button text-decoration-none mb-5 animate-fade-up delay-2">
+      <NavLink to="/products" className="neo-button text-decoration-none mb-5 animate-fade-up delay-2">
         ACCESS_INVENTORY <i className="fa-solid fa-box-open ms-2"></i>
       </NavLink>
 

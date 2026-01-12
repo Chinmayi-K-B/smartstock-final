@@ -1,69 +1,49 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const bcrypt = require("bcryptjs");
+// 1. IMPORTS
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const router = require("./Routes/router");
 
-// 1. CONNECT TO DATABASE
-mongoose.connect(process.env.MONGO_URI || "YOUR_MONGODB_URI_HERE", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => console.log("Connected to MongoDB")).catch((err) => console.log("DB Error:", err));
-
-// 2. IMPORT SCHEMA (Using 'Models' with Capital M to match your folder)
-// We use a try-catch just in case, but prioritize the Capital M
-let users;
-try {
-    users = require('./Models/userSchema');
-} catch (e) {
-    users = require('./Models/userSchema');
-}
+// --- NEW: Import Prometheus Bundle ---
+const promBundle = require("express-prom-bundle");
 
 const app = express();
-const port = process.env.PORT || 3001;
 
+// 2. PROMETHEUS MIDDLEWARE (MUST be before router)
+// This automatically adds the /metrics endpoint
+const metricsMiddleware = promBundle({
+  includeMethod: true, 
+  includePath: true, 
+  customLabels: {'app_name': 'inventory_backend'},
+  promClient: {
+    collectDefaultMetrics: {
+    }
+  }
+});
+app.use(metricsMiddleware);
+
+// 3. STANDARD MIDDLEWARE
 app.use(cors());
 app.use(express.json());
 
-// 3. DEBUG ROUTE
-app.get("/", (req, res) => {
-    res.json("Backend is Live!");
-});
+// 4. USE ROUTER
+app.use(router);
 
-// 4. LOGIN ROUTE (Directly inside index.js to prevent 404s)
-app.post("/login", async (req, res) => {
-    console.log("Login hit:", req.body);
-    const { email, password } = req.body;
+// 5. DATABASE CONNECTION
+// Note: Ensure your Docker Compose sets the MONGO_URI variable.
+// I removed the < > brackets from your password string below as they are usually placeholders.
+const DB = process.env.MONGO_URI || "mongodb+srv://chinmayikb_db_user:vJuTcTeM1b07U7C2@cluster0.xiqjmyf.mongodb.net/?appName=Cluster0"; 
 
-    if (!email || !password) return res.status(400).json({ error: "Fill all details" });
+mongoose.connect(DB)
+    .then(() => {
+        console.log("Connected to MongoDB Successfully");
+    })
+    .catch((err) => {
+        console.log("MongoDB Connection Error:", err);
+    });
 
-    try {
-        const userValid = await users.findOne({ email: email });
-        if (userValid) {
-            const isMatch = await bcrypt.compare(password, userValid.password);
-            if (!isMatch) {
-                res.status(422).json({ error: "Invalid Details" });
-            } else {
-                const token = await userValid.generateAuthToken();
-                res.cookie("usercookie", token, { expires: new Date(Date.now() + 9000000), httpOnly: true });
-                res.status(201).json({ status: 201, result: { userValid, token } });
-            }
-        } else {
-            res.status(422).json({ error: "Invalid Details" });
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(401).json(error);
-    }
-});
-
-// 5. IMPORT ROUTER (Using 'Routes' with Capital R to match your folder)
-try {
-    const router = require('./Routes/router');
-    app.use(router);
-} catch (error) {
-    console.log("External router failed, but Login is safe.");
-}
-
+// 6. START SERVER
+const port = 3001;
 app.listen(port, () => {
     console.log(`Backend listening on port ${port}`);
 });

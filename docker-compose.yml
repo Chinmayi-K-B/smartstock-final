@@ -1,0 +1,65 @@
+services:
+  # 1. Frontend Service
+  # 1. Frontend Service
+  frontend:
+    build: ./frontend/inventory_management_system  # <--- CHANGED THIS PATH
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # 2. Backend Service
+  backend:
+    build: ./backend
+    ports:
+      - "3001:3001"
+    environment:
+      # This connects to the 'database' service defined below
+      - MONGO_URI=mongodb+srv://chinmayikb_db_user:vJuTcTeM1b07U7C2@cluster0.xiqjmyf.mongodb.net/IMS?appName=Cluster0
+      - PORT=3001
+    depends_on:
+      - database
+    networks:
+      - app-network
+
+  # 3. Database Service
+  database:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+# 4. Prometheus Service
+  prometheus:
+    build: ./prometheus_setup  # Build from the new folder
+    ports:
+      - "9090:9090"
+    # We REMOVED the 'volumes' section entirely
+    # The config is now baked inside the image
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3002:3000"  # LEFT is Your PC (3002), RIGHT is Container (3000)
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:

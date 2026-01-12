@@ -1,106 +1,112 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BASE_URL } from '../helper';
 
 export default function InsertProduct() {
-    
-    // STATE: Name, Price, Barcode, AND QUANTITY
-    const [productName, setProductName] = useState("");
-    const [productPrice, setProductPrice] = useState("");
-    const [productBarcode, setProductBarcode] = useState("");
-    const [productQty, setProductQty] = useState(""); // <--- NEW FIELD
-    
-    const [error, setError] = useState(false);
     const navigate = useNavigate();
 
-    const addProduct = async (e) => {
+    const [inpval, setINP] = useState({
+        ProductName: "",
+        ProductBarcode: "",
+        ProductPrice: "",
+        ProductQty: ""
+    });
+
+    const setdata = (e) => {
+        const { name, value } = e.target;
+        setINP((preval) => {
+            return {
+                ...preval,
+                [name]: value
+            }
+        })
+    };
+
+    const addinpdata = async (e) => {
         e.preventDefault();
 
-        // VALIDATION
-        if (!productName || !productPrice || !productBarcode || !productQty) {
-            setError(true);
-            return false;
+        const { ProductName, ProductBarcode, ProductPrice, ProductQty } = inpval;
+        
+        // 1. DATA VALIDATION
+        if (ProductName === "") {
+            alert("Product Name is required");
+            return;
         }
 
-        // CONNECT TO BACKEND
+        console.log("Sending Data...", inpval);
+
         try {
-            const res = await fetch("${BASE_URL}", {
+            // FIXED: Ensure this URL uses standard http protocol
+            const res = await fetch("http://localhost:3001/insertproduct", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    ProductName: productName,
-                    ProductPrice: productPrice,
-                    ProductBarcode: productBarcode,
-                    ProductQty: productQty 
+                    ProductName, 
+                    ProductBarcode, 
+                    ProductPrice, 
+                    ProductQty
                 })
             });
 
             const data = await res.json();
+            console.log("Server Response:", data);
 
             if (res.status === 422 || !data) {
-                alert("Error: Check inputs");
+                alert("Error: Backend rejected the data. Check console.");
+                console.log("Error Details:", data);
             } else {
-                alert("Product Added Successfully!");
+                alert("Data Added Successfully! 🚀");
                 navigate("/products");
             }
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.error("Connection Failed:", error);
+            alert("Connection Error: Is the Backend running on port 3001?");
         }
     }
 
     return (
-        <div className='app-container'>
-            <div className="d-flex justify-content-between align-items-center mb-5">
-                <h1 className="m-0">NEW_ENTRY</h1>
-                <NavLink to="/products" className='neo-button text-decoration-none' style={{backgroundColor: '#ef4444', color: 'white'}}> 
-                    <i className="fa-solid fa-xmark me-2"></i> CANCEL
-                </NavLink>
-            </div>
-
-            <div className='mx-auto' style={{maxWidth: '800px'}}>
-                <div className='neo-card'>
-                    <form>
-                        <div className="row">
-                            <div className="mb-4 col-md-6">
-                                <label className="form-label fw-bold">PRODUCT_NAME</label>
-                                <input type="text" className="form-control border-3 border-black rounded-0 p-3" 
-                                    value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Item Name" />
-                                {error && !productName && <span className='text-danger fw-bold'>* Required</span>}
-                            </div>
-                            <div className="mb-4 col-md-6">
-                                <label className="form-label fw-bold">BARCODE</label>
-                                <input type="number" className="form-control border-3 border-black rounded-0 p-3" 
-                                    value={productBarcode} onChange={(e) => setProductBarcode(e.target.value)} placeholder="Barcode" />
-                                {error && !productBarcode && <span className='text-danger fw-bold'>* Required</span>}
-                            </div>
+        <div className="container mt-5">
+            <h1 className='fw-bold mb-4'>NEW_ENTRY</h1>
+            
+            <div className='neo-card p-5' style={{backgroundColor: '#f3f4f6'}}>
+                <form>
+                    <div className="row">
+                        {/* PRODUCT NAME */}
+                        <div className="mb-3 col-lg-6 col-md-6 col-12">
+                            <label className="form-label fw-bold">PRODUCT_NAME</label>
+                            <input type="text" value={inpval.ProductName} onChange={setdata} name="ProductName" className="form-control border-2 border-black rounded-0" />
                         </div>
 
-                        <div className="row">
-                            <div className="mb-4 col-md-6">
-                                <label className="form-label fw-bold">PRICE ($)</label>
-                                <input type="number" className="form-control border-3 border-black rounded-0 p-3" 
-                                    value={productPrice} onChange={(e) => setProductPrice(e.target.value)} placeholder="0.00" />
-                                {error && !productPrice && <span className='text-danger fw-bold'>* Required</span>}
-                            </div>
-                            
-                            {/* QUANTITY INPUT */}
-                            <div className="mb-4 col-md-6">
-                                <label className="form-label fw-bold text-primary">INITIAL_STOCK (UNITS)</label>
-                                <input type="number" className="form-control border-3 border-black rounded-0 p-3 bg-light" 
-                                    value={productQty} onChange={(e) => setProductQty(e.target.value)} placeholder="Qty" />
-                                {error && !productQty && <span className='text-danger fw-bold'>* Required</span>}
-                            </div>
+                        {/* BARCODE */}
+                        <div className="mb-3 col-lg-6 col-md-6 col-12">
+                            <label className="form-label fw-bold">BARCODE</label>
+                            <input type="number" value={inpval.ProductBarcode} onChange={setdata} name="ProductBarcode" className="form-control border-2 border-black rounded-0" />
                         </div>
 
-                        <div className='mt-4 text-end'>
-                            <button onClick={addProduct} className="neo-button border-0 w-100 py-3">
-                                CONFIRM_ENTRY <i className="fa-solid fa-check ms-2"></i>
-                            </button>
+                        {/* PRICE */}
+                        <div className="mb-3 col-lg-6 col-md-6 col-12">
+                            {/* Correct Visual Symbol */}
+                            <label className="form-label fw-bold">PRICE (₹)</label>
+                            <input type="number" value={inpval.ProductPrice} onChange={setdata} name="ProductPrice" className="form-control border-2 border-black rounded-0" />
                         </div>
-                    </form>
-                </div>
+
+                        {/* QTY */}
+                        <div className="mb-3 col-lg-6 col-md-6 col-12">
+                            <label className="form-label fw-bold">INITIAL_STOCK (UNITS)</label>
+                            <input type="number" value={inpval.ProductQty} onChange={setdata} name="ProductQty" className="form-control border-2 border-black rounded-0" />
+                        </div>
+                    </div>
+
+                    {/* BUTTONS */}
+                    <button type="submit" onClick={addinpdata} className="neo-button w-100 mt-3" style={{backgroundColor: '#facc15', color: 'black'}}>
+                        CONFIRM_ENTRY <i className="fa-solid fa-check ms-2"></i>
+                    </button>
+                    
+                    <NavLink to="/products" className="btn btn-danger w-100 mt-3 border-2 border-black rounded-0 fw-bold">
+                        CANCEL
+                    </NavLink>
+                </form>
             </div>
         </div>
     )
