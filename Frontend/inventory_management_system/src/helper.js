@@ -4,5 +4,5 @@
 // export const BASE_URL = "http://localhost:3001";
 
 // OPTION 2: Render Backend (Use this when deploying)
-export const BASE_URL = "https://your-backend-app-name.onrender.com"; 
+export const BASE_URL = "https://smartstock-backend-x2vv.onrender.com"; 
 // ^ We will update this link in a few minutes!
