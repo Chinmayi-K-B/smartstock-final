@@ -30,30 +30,38 @@ export default function Login() {
         } else if (password === "") {
             alert("Password is required!");
         } else {
-            const res = await fetch("${BASE_URL}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    email, password
-                })
-            });
+            console.log("Attempting to login..."); // Debugging Log
 
-            const data = await res.json();
+            try {
+                // --- FIXED LINE BELOW: Used full URL + /login endpoint ---
+                const res = await fetch("https://smartstock-backend.onrender.com/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email, password
+                    })
+                });
 
-            if (res.status === 422 || !data) {
-                alert("Invalid Credentials");
-            } else {
-                // 1. SUCCESS!
-                alert("Access Granted. Welcome back.");
-                
-                // 2. SAVE THE TOKEN (The "Digital ID Card")
-                // We store this in the browser so we can check it later
-                localStorage.setItem("usersdatatoken", data.result.token);
+                const data = await res.json();
+                console.log("Server Response:", data); // Debugging Log
 
-                // 3. REDIRECT TO PRODUCTS
-                navigate("/products");
+                if (res.status === 422 || !data) {
+                    alert("Invalid Credentials");
+                } else {
+                    // 1. SUCCESS!
+                    alert("Access Granted. Welcome back.");
+                    
+                    // 2. SAVE THE TOKEN
+                    localStorage.setItem("usersdatatoken", data.result.token);
+
+                    // 3. REDIRECT TO PRODUCTS
+                    navigate("/products");
+                }
+            } catch (error) {
+                console.error("Login Error:", error);
+                alert("Connection Error. Please check console.");
             }
         }
     }
