@@ -1,0 +1,120 @@
+/* =========================================
+   COMPONENT STYLES
+   File: src/App.css
+   ========================================= */
+
+/* 1. MAIN LAYOUT 
+   Use this class on your main wrapper div in App.js */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+/* 2. TYPOGRAPHY
+   This styles all <h1> tags to look like the screenshot */
+h1 {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 3rem; /* Big and bold */
+  text-transform: uppercase;
+  margin-bottom: 40px;
+  letter-spacing: -2px;
+  text-shadow: 4px 4px 0px rgba(0,0,0,0.15); /* Subtle shadow */
+}
+
+/* 3. NEW BUTTON STYLE (The "Neo-Button")
+   Add className="neo-button" to your buttons */
+.neo-button {
+  background-color: var(--accent-yellow); /* Yellow background */
+  border: var(--border-thick);            /* 3px Black border */
+  box-shadow: var(--shadow-hard);         /* Hard black shadow */
+  color: #000;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 1rem;
+  padding: 12px 30px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.1s ease;
+  display: inline-block;
+}
+
+.neo-button:hover {
+  transform: translate(-2px, -2px); /* Moves up slightly */
+  box-shadow: 7px 7px 0px 0px #000000; /* Shadow grows */
+}
+
+.neo-button:active {
+  transform: translate(2px, 2px); /* Presses down */
+  box-shadow: 2px 2px 0px 0px #000000;
+}
+
+/* 4. NEW CARD STYLE
+   Add className="neo-card" to your divs */
+.neo-card {
+  background-color: var(--card-bg);
+  border: var(--border-thick);
+  box-shadow: var(--shadow-hard);
+  padding: 25px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+/* 5. UPDATING YOUR EXISTING CLASSES 
+   I adapted these to fit the new theme */
+
+.add_button {
+  text-align: right;
+  margin-bottom: 20px; /* Added spacing so it doesn't touch content */
+}
+
+/* Updated .tr_color to be high-contrast (Black background, White text) */
+.tr_color {
+  background-color: #000000; 
+  color: #ffffff;
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  border: 3px solid #000; /* Adds thick border to the header */
+}
+
+/* PASTE AT THE BOTTOM OF src/App.css */
+
+/* Animation: Slide Up and Fade In */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Class to apply the animation */
+.animate-fade-up {
+  opacity: 0; /* Start invisible */
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Delays for the "staggered" effect */
+.delay-1 { animation-delay: 0.2s; }
+.delay-2 { animation-delay: 0.4s; }
+.delay-3 { animation-delay: 0.6s; }
+.delay-4 { animation-delay: 0.8s; }
+
+/* Blinking Cursor Animation for Typewriter */
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink {
+  display: inline-block;
+  width: 10px;
+  height: 20px;
+  background-color: var(--accent-green);
+  vertical-align: middle;
+  animation: blinkCursor 1s infinite;
+  margin-left: 5px;
+}

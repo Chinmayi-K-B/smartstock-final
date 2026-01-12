@@ -1,0 +1,41 @@
+/* =========================================
+   GLOBAL THEME VARIABLES & BACKGROUND
+   File: src/index.css
+   ========================================= */
+
+:root {
+  /* COLORS */
+  --bg-color: #e6e7ff;         /* The light blue-ish grey background */
+  --text-main: #000000;        /* Pure black text */
+  --card-bg: #ffffff;          /* White card background */
+  
+  /* ACCENT COLORS */
+  --accent-yellow: #facc15;    /* The yellow button color */
+  --accent-green: #4ade80;     /* Green accent */
+  --accent-purple: #c084fc;    /* Purple accent */
+  
+  /* BORDERS & SHADOWS (The Neo-Brutalist Look) */
+  --border-thick: 3px solid #000000;
+  --shadow-hard: 5px 5px 0px 0px #000000; /* Hard shadow, no blur */
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  
+  /* Sets the default font to the "computer code" style */
+  font-family: 'Space Mono', monospace; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* This creates the DOT GRID pattern background */
+  background-image: radial-gradient(#a3a3a3 1px, transparent 1px);
+  background-size: 20px 20px;
+  min-height: 100vh; /* Ensures background covers full height */
+}
+
+code {
+  font-family: 'Space Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
